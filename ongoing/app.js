@@ -53,20 +53,6 @@ app.use(errorController.get404);
 mongoose.connect(MONGODB_URI)
 .then(result => {
     // console.log(result);
-    User.findOne()
-    .then(user => {
-        if(!user) {
-            const user = new User({
-                name: "srikanth",
-                email: "sri@gmail.com",
-                cart: {
-                    items: []
-                }
-            });   
-            user.save();
-        }
-    })
-
     app.listen(3000, () => {
         console.log("Server is running at 3000 port and connected to shop DB");
     });
