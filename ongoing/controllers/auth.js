@@ -5,18 +5,23 @@ const User = require('../models/user')
 exports.getLogin = (req, res, next) => {
     // isLogedIn = req.get('Cookie').split('=')[1] === 'true';
     // console.log(req.session.isLogedIn);
+    let message = req.flash('error');
+    if (message.length > 0) {
+        message = message[0];
+    } else {
+        message = null;
+    }
     res.render('auth/login', {
         pageTitle: 'Login',
         path: '/login',
-        isAuthenticated: false
+        errorMessage: message
     });
 };
 
 exports.getSignup = (req,res,next) => {
     res.render('auth/signup', {
         pageTitle: 'SignUp',
-        path: '/signup',
-        isAuthenticated: false
+        path: '/signup'
     });
 }
 
@@ -26,6 +31,7 @@ exports.postLogin = (req, res, next) => {
     User.findOne( { email: email } )
     .then(user => {
         if (!user) {
+            req.flash('error','Invalid email or password.');
             return res.redirect('/login')
         }
         bcrypt
@@ -39,6 +45,7 @@ exports.postLogin = (req, res, next) => {
                     res.redirect('/');
                 })
             }
+            req.flash('error','Invalid email or password.');
             res.redirect('/login');
         })
         .catch(err => {
