@@ -1,6 +1,16 @@
 const bcrypt = require('bcryptjs');
+const nodemailer = require('nodemailer');
+// const sendGridTransport = require('nodemailer-sendgrid-transport');
 
 const User = require('../models/user')
+
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'mailto:srikanth.golla@brainvire.com',
+        pass: 'Srik@nth19'
+    }
+})
 
 exports.getLogin = (req, res, next) => {
     // isLogedIn = req.get('Cookie').split('=')[1] === 'true';
@@ -86,6 +96,16 @@ exports.postSignup = (req,res,next) => {
         })
         .then(result => {
             res.redirect('/login');
+            return transporter.sendMail({
+                to: email,
+                from: 'mailto:srikanth.golla@brainvire.com',
+                subject: "You are successfully Signedup",
+                text: 'Hello from Node-Project',
+                html: '<h1>You Successfully Signed up!</h1>'
+            })
+        })
+        .catch(err => {
+            console.log(err);
         });
     })
     .catch(err => {
