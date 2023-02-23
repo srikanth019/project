@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
 // const sendGridTransport = require('nodemailer-sendgrid-transport');
@@ -119,3 +120,54 @@ exports.postLogout = (req, res, next) => {
         res.redirect('/');
     });
 };
+
+exports.getReset = (req,res,next) => {
+    let message = req.flash('error');
+    if (message.length > 0) {
+        message = message[0];
+    } else {
+        message = null;
+    }
+    res.render('auth/reset', {
+        pageTitle: 'Reset Password',
+        path: '/reset',
+        errorMessage: message
+    });
+};
+
+exports.postReset = (req,res,next) => {
+    crypto.randomBytes(32, (err,buffer) => { //here 2nd arg is the cb it will be executed once it done.
+        if (err) {
+            console.log(err);
+            return res.redirect('/reset');
+        }
+        const token = buffer.toString('hex');
+        User.findOne({ email: req.body.email})
+        .then(user => {
+            if (!user) {
+                req.flash('error', 'No account is Found with this Email')
+                res.redirect('/reset');
+            }
+            user.resetToken = token;
+            user.resetTokenExpiration = Date.now() + 3600000;
+            return user.save();
+        })
+        .then(result => {
+            res.redirect('/');
+            transporter.sendMail({
+                to: req.body.email,
+                from: 'mailto:srikanth.golla@brainvire.com',
+                subject: "Password Reset",
+                text: 'Hello from Node-Project Password Resetting',
+                html: `
+                    <p>You requested password reset</p>
+                    <p>Click this <a href="http://localhost:3000/reset/${token}">link</a> to reset user password.</p>
+                `
+            });
+        })
+        .catch(err => {
+            console.log(err);
+        })
+
+    })
+}

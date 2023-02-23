@@ -11,6 +11,8 @@ const mongoose = require('mongoose');
         type: String,
         required: true
     },
+    resetToken: String,
+    resetTokenExpiration: Date,
     cart : {
         items: [
             { 
