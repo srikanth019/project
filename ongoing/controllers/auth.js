@@ -102,7 +102,9 @@ exports.postSignup = (req,res,next) => {
                 from: 'mailto:srikanth.golla@brainvire.com',
                 subject: "You are successfully Signedup",
                 text: 'Hello from Node-Project',
-                html: '<h1>You Successfully Signed up!</h1>'
+                html: `<h1>You Successfully Signedup our Node-Shop App</h1>
+                    <p>Your password is ${password} </p>
+                `
             })
         })
         .catch(err => {
@@ -170,4 +172,72 @@ exports.postReset = (req,res,next) => {
         })
 
     })
+};
+
+exports.getNewPassword = (req,res,next) => {
+    const token = req.params.token;
+    User.findOne( { resetToken: token, resetTokenExpiration: { $gt: Date.now() } })
+    .then(user => {
+        console.log(user);
+        let message = req.flash('error');
+        if (message.length > 0) {
+            message = message[0];
+        } else {
+            message = null;
+        }
+        res.render('auth/new-password', {
+            pageTitle: 'New Password',
+            path: '/new-password',
+            errorMessage: message,
+            userId: user._id.toString(),
+            passwordToken: token,
+            email: user.email
+        });
+    })
+    .catch(err => {
+        console.log(err);
+    })
+    
+};
+
+exports.postNewPassword = (req,res,next) => {
+    const newPassword = req.body.password;
+    const userId = req.body.userId;
+    const passwordToken = req.body.passwordToken;
+    const email = req.body.email;
+
+    let resetUser;
+
+    User.findOne( { 
+        resetToken: passwordToken,
+        resetTokenExpiration : { $gt: Date.now() },
+        _id: userId
+    })
+    .then(user => {
+        resetUser = user;
+        return bcrypt.hash(newPassword, 12);
+    })
+    .then(hashedPassword => {
+        resetUser.password = hashedPassword;
+        resetUser.resetToken = undefined;
+        resetUser.resetTokenExpiration = undefined;
+        return resetUser.save()
+    })
+    .then(result => {
+        res.redirect('/login');
+        transporter.sendMail({
+            to: email,
+            from: 'mailto:srikanth.golla@brainvire.com',
+            subject: "Password Successfully Changed",
+            text: 'Hello from Node-Project',
+            html: `
+                <h1>You have Successfully Changed Your Password</h1>
+                <p>Your new password is ${newPassword}</p>
+            `
+        })
+    })
+    .catch(err => {
+        console.log(err);
+    })
+
 }
