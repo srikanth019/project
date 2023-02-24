@@ -102,8 +102,8 @@ exports.postSignup = (req,res,next) => {
                 from: 'mailto:srikanth.golla@brainvire.com',
                 subject: "You are successfully Signedup",
                 text: 'Hello from Node-Project',
-                html: `<h1>You Successfully Signedup our Node-Shop App</h1>
-                    <p>Your password is ${password} </p>
+                html: `<h1>You Successfully Signedup to our first Node-Shop App</h1>
+                    <p>Your password is: "${password}" </p>
                 `
             })
         })
@@ -232,7 +232,7 @@ exports.postNewPassword = (req,res,next) => {
             text: 'Hello from Node-Project',
             html: `
                 <h1>You have Successfully Changed Your Password</h1>
-                <p>Your new password is ${newPassword}</p>
+                <p>Your new password is: "${newPassword}"</p>
             `
         })
     })
