@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
+const { validationResult } = require('express-validator');
 // const sendGridTransport = require('nodemailer-sendgrid-transport');
 
 const User = require('../models/user')
@@ -80,40 +81,41 @@ exports.postSignup = (req,res,next) => {
     const email = req.body.email;
     const password = req.body.password;
     const confirmPassword = req.body.confirmPassword;
-    User.findOne({email: email})
-    .then(userDoc => {
-        if (userDoc) {
-            req.flash('error','This E-mail is already exists');
-            return res.redirect('/signup');
-        }
-        return bcrypt.hash(password, 12)
-        .then(hashedPassword => {
-            const user = new User({
-                email: email,
-                password: hashedPassword,
-                cart: { items: [] }
-            });
-            return user.save();
-        })
-        .then(result => {
-            res.redirect('/login');
-            return transporter.sendMail({
-                to: email,
-                from: 'mailto:srikanth.golla@brainvire.com',
-                subject: "You are successfully Signedup",
-                text: 'Hello from Node-Project',
-                html: `<h1>You Successfully Signedup to our first Node-Shop App</h1>
-                    <p>Your password is: "${password}" </p>
-                `
-            })
-        })
-        .catch(err => {
-            console.log(err);
+    
+    const errors = validationResult(req); 
+    if (!errors.isEmpty()) {
+        // console.log(errors.array());
+        return res.status(422).render('auth/signup', {
+            pageTitle: 'SignUp',
+            path: '/signup',
+            errorMessage: errors.array()[0].msg
         });
+    }
+
+    bcrypt.hash(password, 12)
+    .then(hashedPassword => {
+        const user = new User({
+            email: email,
+            password: hashedPassword,
+            cart: { items: [] }
+        });
+        return user.save();
+    })
+    .then(result => {
+        res.redirect('/login');
+        return transporter.sendMail({
+            to: email,
+            from: 'mailto:srikanth.golla@brainvire.com',
+            subject: "You are successfully Signedup",
+            text: 'Hello from Node-Project',
+            html: `<h1>You Successfully Signedup to our first Node-Shop App</h1>
+                <p>Your password is: "${password}" </p>
+            `
+        })
     })
     .catch(err => {
         console.log(err);
-    })
+    });
 }
 
 exports.postLogout = (req, res, next) => {

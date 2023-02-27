@@ -1,6 +1,9 @@
 const express = require('express');
 
+const { check, body } = require('express-validator');//param, header, cookie, query     
+
 const authController = require('../controllers/auth');
+const User = require('../models/user');
 
 const router = express.Router();
 
@@ -10,7 +13,33 @@ router.get('/signup', authController.getSignup);
 
 router.post('/login', authController.postLogin);
 
-router.post('/signup', authController.postSignup);
+router.post('/signup',
+    [
+        check('email')
+        .isEmail()
+        .withMessage('Please enter a valid E-mail')
+        .custom((value, {req}) => {
+            // if (value === "test@test.com"){
+            //     throw new Error('This is Invalid E-mail address!!!!!');
+            // }
+            // return true;
+            return User.findOne({email: value}).then(userDoc => {
+                if(userDoc) {
+                    return Promise.reject('This E-mail is already exists');
+                }
+            });
+        }),
+        //we can also use check validator here
+        body('password', "Please Enter a password with Only numbers and text with atleast 6 characters")
+        .isLength({ min: 6, max: 10 }),
+        body('confirmPassword').custom((value, {req}) => {
+            if (value !== req.body.password) {
+                throw new Error('Passwords should be match!!');
+            }
+            return true;
+        })
+    ],
+    authController.postSignup);
 
 router.post('/logout', authController.postLogout);
 
