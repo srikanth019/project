@@ -12,7 +12,7 @@ const transporter = nodemailer.createTransport({
         user: 'mailto:srikanth.golla@brainvire.com',
         pass: 'Srik@nth19'
     }
-})
+});
 
 exports.getLogin = (req, res, next) => {
     // isLogedIn = req.get('Cookie').split('=')[1] === 'true';
@@ -40,7 +40,13 @@ exports.getSignup = (req,res,next) => {
     res.render('auth/signup', {
         pageTitle: 'SignUp',
         path: '/signup',
-        errorMessage: message
+        errorMessage: message,
+        oldInput: {
+            email: "",
+            password: "",
+            confirmPassword: ""
+        },
+        validatingErrors: []
     });
 }
 
@@ -95,11 +101,17 @@ exports.postSignup = (req,res,next) => {
     
     const errors = validationResult(req); 
     if (!errors.isEmpty()) {
-        // console.log(errors.array());
+        console.log(errors.array());
         return res.status(422).render('auth/signup', {
             pageTitle: 'SignUp',
             path: '/signup',
-            errorMessage: errors.array()[0].msg
+            errorMessage: errors.array()[0].msg,
+            oldInput: {
+                email: email,
+                password: password,
+                confirmPassword: confirmPassword
+            },
+            validatingErrors: errors.array()
         });
     }
 
