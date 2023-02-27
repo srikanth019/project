@@ -11,7 +11,13 @@ router.get('/login', authController.getLogin);
 
 router.get('/signup', authController.getSignup);
 
-router.post('/login', authController.postLogin);
+router.post('/login',
+    [
+        body('email').isEmail().withMessage('Enter a Valid E-mail'),
+        body('password','Enter a Valid password')
+        .isLength({ min: 6, max: 10 }).isAlphanumeric()
+    ],
+    authController.postLogin);
 
 router.post('/signup',
     [
@@ -31,7 +37,7 @@ router.post('/signup',
         }),
         //we can also use check validator here
         body('password', "Please Enter a password with Only numbers and text with atleast 6 characters")
-        .isLength({ min: 6, max: 10 }),
+        .isLength({ min: 6, max: 10 }).isAlphanumeric(),
         body('confirmPassword').custom((value, {req}) => {
             if (value !== req.body.password) {
                 throw new Error('Passwords should be match!!');
