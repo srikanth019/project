@@ -13,9 +13,14 @@ router.get('/signup', authController.getSignup);
 
 router.post('/login',
     [
-        body('email').isEmail().withMessage('Enter a Valid E-mail'),
+        body('email')
+            .isEmail()
+            .withMessage('Enter a Valid E-mail')
+            .normalizeEmail(),
         body('password','Enter a Valid password')
-        .isLength({ min: 6, max: 10 }).isAlphanumeric()
+            .isLength({ min: 6, max: 16 })
+            .isAlphanumeric()
+            .trim()
     ],
     authController.postLogin);
 
@@ -34,16 +39,21 @@ router.post('/signup',
                     return Promise.reject('This E-mail is already exists');
                 }
             });
-        }),
+        })
+        .normalizeEmail(),
         //we can also use check validator here
         body('password', "Please Enter a password with Only numbers and text with atleast 6 characters")
-        .isLength({ min: 6, max: 10 }).isAlphanumeric(),
-        body('confirmPassword').custom((value, {req}) => {
-            if (value !== req.body.password) {
-                throw new Error('Passwords should be match!!');
-            }
-            return true;
-        })
+            .isLength({ min: 6, max: 16 })
+            .isAlphanumeric()
+            .trim(),
+        body('confirmPassword')
+            .custom((value, {req}) => {
+                if (value !== req.body.password) {
+                    throw new Error('Passwords should be match!!');
+                }
+                return true;
+            })
+            .trim()
     ],
     authController.postSignup);
 
