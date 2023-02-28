@@ -31,7 +31,7 @@ exports.getLogin = (req, res, next) => {
             email: "",
             password: ""
         },
-        validatingErrors: []
+        validationErrors: []
     });
 };
 
@@ -51,7 +51,7 @@ exports.getSignup = (req,res,next) => {
             password: "",
             confirmPassword: ""
         },
-        validatingErrors: []
+        validationErrors: []
     });
 }
 
@@ -71,7 +71,7 @@ exports.postLogin = (req, res, next) => {
                 email: email,
                 password: password
             },
-            validatingErrors: errors.array()
+            validationErrors: errors.array()
         });
    }
 
@@ -86,7 +86,7 @@ exports.postLogin = (req, res, next) => {
                     email: email,
                     password: password
                 },
-                validatingErrors: []
+                validationErrors: []
             });
         }
         bcrypt
@@ -108,7 +108,7 @@ exports.postLogin = (req, res, next) => {
                     email: email,
                     password: password
                 },
-                validatingErrors: []
+                validationErrors: []
             });
         })
         .catch(err => {
@@ -138,7 +138,7 @@ exports.postSignup = (req,res,next) => {
                 password: password,
                 confirmPassword: confirmPassword
             },
-            validatingErrors: errors.array()
+            validationErrors: errors.array()
         });
     }
 
