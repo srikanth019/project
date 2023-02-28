@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+
 const { validationResult } = require('express-validator')
 
 const Product = require('../models/product');
@@ -26,7 +28,7 @@ exports.postAddProduct = (req, res, next) => {
     // console.log(errors.array())
     return res.status(422).render('admin/edit-product', {  
       pageTitle: 'Add Product',
-      path: '/admin/edit-product',
+      path: '/admin/add-product',
       editing: false,
       hasError: true,
       product: {
@@ -41,6 +43,7 @@ exports.postAddProduct = (req, res, next) => {
   }
 
   const product = new Product({
+    // _id: new mongoose.Types.ObjectId('63fd99f93576d0469913288f'),
     title: title,
     price: price,
     description: description,
@@ -55,7 +58,9 @@ exports.postAddProduct = (req, res, next) => {
     res.redirect('/admin/products');
   })
   .catch(err => {
-    console.log(err);
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   });
 };
 
@@ -82,7 +87,9 @@ exports.getEditProduct = (req, res, next) => {
     });
   })
   .catch(err => {
-    console.log(err);
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   });
 };
 
@@ -132,7 +139,9 @@ exports.postEditProduct = (req, res, next) => {
         });
     })
     .catch(err => {
-      console.log(err);
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
     });
 };
 
@@ -150,7 +159,9 @@ exports.getProducts = (req, res, next) => {
     });
   })
   .catch(err => {
-    console.log(err);
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   });
 };
 
@@ -162,6 +173,8 @@ exports.postDeleteProduct = (req, res, next) => {
     res.redirect('/admin/products');
   })
   .catch(err => {
-    console.log(err);
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   });
 };
