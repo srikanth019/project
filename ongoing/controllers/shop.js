@@ -1,3 +1,6 @@
+const fs = require('fs');
+const path = require('path');
+
 const Product = require('../models/product');
 const Order = require('../models/order');
 
@@ -163,4 +166,38 @@ exports.getOrders = (req, res, next) => {
   });
 };
 
+exports.getInvoice = (req,res, next) => {
+  const orderId = req.params.orderId;
+  Order.findById(orderId)
+  .then(order => {
+    // console.log(order);
+    if (!order) {
+      return next(new Error('No order Found!.'))
+    }
+    // console.log(order.user.userId.toString() === req.user._id.toString());
+    if (order.user.userId.toString() !== req.user._id.toString()) {
+      return next(new Error('Unautherized User!.'));
+    }
+    const invoiceName = 'invoice-' + orderId + '.pdf';
+    const invoicePath = path.join('data', 'invoices', invoiceName);
+    // fs.readFile(invoicePath, (err, data) => {
+    //   if (err) {
+    //     return next(err);
+    //   }
+    //   res.setHeader('Content-Type', 'application/pdf');
+    //   // res.setHeader('Content-Disposition', 'attachment; filename="' + invoiceName + '"');
+    //   res.setHeader("Content-Disposition", 'inline; filename="' + invoiceName + '"');
+    //   res.send(data);
+    //   res.end();    
+    // });
 
+    const file = fs.createReadStream(invoicePath);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader("Content-Disposition", 'inline; filename="' + invoiceName + '"');
+    file.pipe(res);
+  })
+  .catch(err => {
+    next(err);
+  })
+  
+}
