@@ -4,6 +4,7 @@ const fileHelper = require('../util/file');
 const { validationResult } = require('express-validator')
 
 const Product = require('../models/product');
+const User = require('../models/user');
 
 exports.getAddProduct = (req, res, next) => {
   res.render('admin/edit-product', {
@@ -191,10 +192,23 @@ exports.postDeleteProduct = (req, res, next) => {
     if (!product) {
       return next(new Error('Product not fount!!'));
     }
+    //delete  the product image from the server
     fileHelper.deleteFile(product.imageUrl);
-    return Product.deleteOne({ _id: prodId, userId: req.user._id });
+    return Product.deleteOne({ _id: prodId, userId: req.user._id })
   })
-  .then(() => {
+  // delete the deleted product from user cart
+  .then((result) => {
+    if (result.deletedCount > 0) {
+      console.log(`Deleted product ! (Total deleted: ${result.deletedCount})`);
+    }
+    return User.updateMany({}, {
+      $pull: { "cart.items": {productId: prodId}}
+    })
+  })
+  .then((result) => {
+    if (result.modifiedCount > 0) {
+      console.log(`Removed product from every cart ! (Total modified: ${result.modifiedCount})`);
+    }
     console.log('PRODUCT DELETED');
     res.redirect('/admin/products');
   })
