@@ -1,0 +1,7 @@
+{
+    "env": {
+        "MONGODB_USER": "srikanth19",
+        "MONGODB_PASSWORD": "1858260338",
+        "MONGODB_DEFALT_DATABASE": "shop"
+    }
+}
